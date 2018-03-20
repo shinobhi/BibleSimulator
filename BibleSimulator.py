@@ -3,7 +3,7 @@ import random
 
 count = { }
 
-corpus = open('corpus-genesis.txt', 'r').read()
+corpus = open('corpora/genesis.txt', 'r').read()
 
 words = corpus.split()
 
