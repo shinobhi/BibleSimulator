@@ -2,9 +2,13 @@
 
 inp = input("Please enter the name of the desired file to process: ")
 
-with open(inp) as infile, open('corpus-' + inp, 'w') as outfile:
+with open('corpora-raw/' + inp) as infile, open('corpora/' + inp, 'w') as outfile:
+	first = True
 	for line in infile:
-		if not line.strip(): # deal with empty line
+		if first == True and not line.strip():
+			outfile.write("<verse>")
+			first = False
+		elif not line.strip(): # deal with empty line
 			outfile.write("</verse>\n")
 			outfile.write("<verse>")
 		outfile.write(line)
