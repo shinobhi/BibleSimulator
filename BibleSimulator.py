@@ -1,53 +1,60 @@
 import nltk
 import random
+from collections import defaultdict
 
-count = { }
+def gen_trigrams():
+	corpus = open('corpora/genesis.txt', 'r').read()
+	words = corpus.split()
+	trigrams = { }
 
-corpus = open('corpora/genesis.txt', 'r').read()
+	for word1, word2, word3 in nltk.trigrams(words):
+		if (word1, word2) not in trigrams:
+			trigrams[(word1, word2)] = { }
 
-words = corpus.split()
-
-for word1, word2 in nltk.bigrams(words):
-    if word1 not in count:
-        count[word1] = { }
-
-    if word2 not in count[word1]:
-        count[word1][word2] = 1
-    else:
-        count[word1][word2] += 1
-
-proba = count
-proba2 = { }
-
-for word1 in proba:
-	for word2 in proba[word1]:
-		if word1 not in proba2:
-			proba2[word1] = proba[word1][word2]
+		if word3 not in trigrams[(word1, word2)]:
+			trigrams[(word1, word2)][word3] = 1
 		else:
-			proba2[word1] += proba[word1][word2]
-	for word2 in proba[word1]:
-		proba[word1][word2] = proba[word1][word2]/proba2[word1]
+			trigrams[(word1, word2)][word3] += 1
 
-# print(proba)
-# prints my dictionary
+	for key in trigrams:
+		total = 0
+		for word in trigrams[key]:
+			total += trigrams[key][word]
+		for word in trigrams[key]:
+			trigrams[key][word] = trigrams[key][word] / total
 
-current_word1 = '<verse>'
-current_word2 = ''
-text = " "
+	return trigrams
 
-while(True):
-	if current_word1 == '</verse>':
-		break;
-	k = random.random()
-	j = 0
-	for i in range(0, len(list(proba[current_word1].values()))):
-		j += list(proba[current_word1].values())[i]
-		if (k < j):
-			current_word2 = list(proba[current_word1].keys())[i]
-			break
+def gen_verse(trigrams):
 
-	if (current_word1 != "<verse>"):
-		text = text + " " + current_word1
-	current_word1 = current_word2
+	w = '-1:-1'
+	w0 = '<verse>'
 
-print(text)
+	while (w0, w) not in trigrams:
+		c = random.randint(1, 150)
+		v = random.randint(1, 150)
+		w = str(c) + ":" + str(v)
+
+	ret = [w]
+	
+	text = ""
+	while (True):
+		if w == '</verse>':
+			break;
+		k = random.random()
+		j = 0
+		for i in range(0, len(list(trigrams[(w0, w)].values()))):
+			j += list(trigrams[(w0, w)].values())[i]
+			if (k < j):
+				w1 = list(trigrams[(w0, w)].keys())[i]
+				break
+
+		if (w != "<verse>"):
+			text = text + " " + w
+		w0, w = w, w1
+
+	return text
+
+if __name__ == "__main__":
+	trig = gen_trigrams()
+	print(gen_verse(trig))
